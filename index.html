@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Repair Tracking Portal</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">After-Sales Service</p>
+        <h1>Repair Tracking Portal</h1>
+      </div>
+      <div class="role-switcher" aria-label="Role selector">
+        <button class="role active" data-role="customer">Customer</button>
+        <button class="role" data-role="engineer">Engineer</button>
+        <button class="role" data-role="admin">Admin</button>
+      </div>
+    </header>
+
+    <main class="shell">
+      <aside class="sidebar">
+        <section class="panel lookup-panel">
+          <h2>Lookup</h2>
+          <label for="lookupInput">Sales order, serial number, RMA, or tracking number</label>
+          <div class="lookup-row">
+            <input id="lookupInput" type="search" placeholder="SO-2026-1048" />
+            <button id="lookupButton">Search</button>
+          </div>
+          <p class="hint">Try: SO-2026-1048, DR-CR20A-1129, RMA-1001, 1Z999AA10123456784</p>
+        </section>
+
+        <section class="panel ticket-list">
+          <div class="panel-title">
+            <h2>Open RMAs</h2>
+            <span id="ticketCount"></span>
+          </div>
+          <div id="ticketList"></div>
+        </section>
+      </aside>
+
+      <section class="content">
+        <section class="hero panel">
+          <div>
+            <p class="eyebrow" id="ticketStatusLabel">Current repair case</p>
+            <h2 id="ticketTitle"></h2>
+            <p id="ticketSubtitle"></p>
+          </div>
+          <div class="status-stack">
+            <span class="status-pill" id="statusPill"></span>
+            <span class="sla-pill" id="slaPill"></span>
+          </div>
+        </section>
+
+        <section class="grid cards-grid">
+          <article class="panel metric-card">
+            <p>Warranty</p>
+            <strong id="warrantyState"></strong>
+            <span id="warrantyDates"></span>
+          </article>
+          <article class="panel metric-card">
+            <p>UPS Tracking</p>
+            <strong id="upsState"></strong>
+            <span id="upsDates"></span>
+          </article>
+          <article class="panel metric-card">
+            <p>Repair SLA</p>
+            <strong id="slaState"></strong>
+            <span id="slaDates"></span>
+          </article>
+          <article class="panel metric-card">
+            <p>Estimated Charge</p>
+            <strong id="chargeState"></strong>
+            <span id="chargeDetail"></span>
+          </article>
+        </section>
+
+        <section class="panel timeline-panel">
+          <div class="panel-title">
+            <h2>Repair Timeline</h2>
+            <button id="syncUpsButton" class="secondary">Sync UPS</button>
+          </div>
+          <div id="timeline"></div>
+        </section>
+
+        <section class="two-column">
+          <article class="panel">
+            <div class="panel-title">
+              <h2>Repair Log</h2>
+              <span class="role-note">Engineer updates, customer can read</span>
+            </div>
+            <form id="logForm" class="stacked-form restricted engineer-only">
+              <label>
+                Work note
+                <textarea id="logText" rows="4" placeholder="Describe inspection, repair action, or next step"></textarea>
+              </label>
+              <label>
+                Photo evidence
+                <input id="logPhoto" type="file" accept="image/*" capture="environment" />
+              </label>
+              <button type="submit">Add daily update</button>
+            </form>
+            <div id="repairLogs" class="log-list"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-title">
+              <h2>Customer Questions</h2>
+              <span class="role-note">Read-only case, message allowed</span>
+            </div>
+            <form id="messageForm" class="stacked-form">
+              <label>
+                Suggestion or question
+                <textarea id="messageText" rows="4" placeholder="Ask a question or add information for the engineer"></textarea>
+              </label>
+              <button type="submit">Send message</button>
+            </form>
+            <div id="messages" class="message-list"></div>
+          </article>
+        </section>
+
+        <section class="two-column">
+          <article class="panel restricted engineer-admin-only">
+            <div class="panel-title">
+              <h2>Parts & Pricing</h2>
+              <label class="inline-control">
+                Repair for
+                <select id="customerType">
+                  <option value="endCustomer">End customer</option>
+                  <option value="dealer">Dealer</option>
+                </select>
+              </label>
+            </div>
+            <div class="parts-upload">
+              <label>
+                Upload BOM CSV
+                <input id="bomUpload" type="file" accept=".csv,text/csv" />
+              </label>
+              <p class="hint">Columns: partNumber, description, endCustomerPrice, dealerPrice</p>
+            </div>
+            <div id="partsCatalog" class="parts-table"></div>
+          </article>
+
+          <article class="panel restricted admin-only">
+            <div class="panel-title">
+              <h2>Admin Controls</h2>
+              <span class="role-note">Warranty and SLA settings</span>
+            </div>
+            <form id="adminForm" class="stacked-form">
+              <label>
+                Warranty expiration
+                <input id="warrantyEndInput" type="date" />
+              </label>
+              <label>
+                Repair SLA working days
+                <input id="slaDaysInput" type="number" min="1" max="30" />
+              </label>
+              <label>
+                Testing days
+                <input id="testingDaysInput" type="number" min="0" max="14" />
+              </label>
+              <button type="submit">Save admin changes</button>
+            </form>
+            <div id="auditLog" class="audit-log"></div>
+          </article>
+        </section>
+      </section>
+    </main>
+
+    <script src="./src/app.js" type="module"></script>
+  </body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "repair-tracking-portal",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Customer-facing repair tracking portal MVP for RMA, warranty, logistics, SLA, parts pricing, and repair logs.",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
