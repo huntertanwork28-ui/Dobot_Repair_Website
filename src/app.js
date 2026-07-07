@@ -1,4 +1,4 @@
-const STORAGE_KEY = "repair-tracking-portal-state-v1";
+const STORAGE_KEY = "repair-tracking-portal-state-v2";
 
 const seedState = {
   role: "customer",
@@ -85,6 +85,8 @@ const seedState = {
 let state = loadState();
 
 const els = {
+  navItems: document.querySelectorAll(".nav-item"),
+  sections: document.querySelectorAll(".section-page"),
   roles: document.querySelectorAll(".role"),
   lookupInput: document.querySelector("#lookupInput"),
   lookupButton: document.querySelector("#lookupButton"),
@@ -102,6 +104,13 @@ const els = {
   slaDates: document.querySelector("#slaDates"),
   chargeState: document.querySelector("#chargeState"),
   chargeDetail: document.querySelector("#chargeDetail"),
+  warrantyDetails: document.querySelector("#warrantyDetails"),
+  logisticsDetails: document.querySelector("#logisticsDetails"),
+  slaStart: document.querySelector("#slaStart"),
+  slaWindow: document.querySelector("#slaWindow"),
+  testingWindow: document.querySelector("#testingWindow"),
+  slaRisk: document.querySelector("#slaRisk"),
+  slaRiskDetail: document.querySelector("#slaRiskDetail"),
   timeline: document.querySelector("#timeline"),
   syncUpsButton: document.querySelector("#syncUpsButton"),
   logForm: document.querySelector("#logForm"),
@@ -197,16 +206,29 @@ function canEditLog() {
 
 function render() {
   const ticket = selectedTicket();
+  renderNavigation();
   renderRoles();
   renderVisibility();
   renderTicketList();
   renderHeader(ticket);
   renderCards(ticket);
+  renderDetailSections(ticket);
   renderTimeline(ticket);
   renderLogs(ticket);
   renderMessages(ticket);
   renderParts(ticket);
   renderAdmin(ticket);
+}
+
+function renderNavigation() {
+  els.navItems.forEach((button) => {
+    const isAdmin = button.classList.contains("admin-nav");
+    button.classList.toggle("is-hidden", isAdmin && state.role !== "admin");
+  });
+  const adminSection = document.querySelector('[data-section="admin"]');
+  if (state.role !== "admin" && adminSection?.classList.contains("active")) {
+    activateSection("overview");
+  }
 }
 
 function renderRoles() {
@@ -225,6 +247,12 @@ function renderVisibility() {
   document.querySelectorAll(".admin-only").forEach((node) => {
     node.classList.toggle("is-hidden", state.role !== "admin");
   });
+  document.querySelectorAll(".customer-parts-note").forEach((node) => {
+    node.classList.toggle("is-hidden", state.role !== "customer");
+  });
+  document.querySelectorAll(".customer-log-note").forEach((node) => {
+    node.classList.toggle("is-hidden", state.role !== "customer");
+  });
 }
 
 function renderTicketList() {
@@ -234,15 +262,15 @@ function renderTicketList() {
       <button class="ticket-card ${ticket.id === state.selectedTicketId ? "active" : ""}" data-ticket="${ticket.id}">
         <strong>${ticket.id}</strong>
         <span>${ticket.product}</span>
-        <span>${ticket.customer} · ${ticket.status}</span>
+        <span>${ticket.customer} - ${ticket.status}</span>
       </button>
     `)
     .join("");
 }
 
 function renderHeader(ticket) {
-  els.ticketTitle.textContent = `${ticket.id} · ${ticket.product}`;
-  els.ticketSubtitle.textContent = `${ticket.customer} · ${ticket.salesOrder} · ${ticket.serialNumber}`;
+  els.ticketTitle.textContent = `${ticket.id} - ${ticket.product}`;
+  els.ticketSubtitle.textContent = `${ticket.customer} - ${ticket.salesOrder} - ${ticket.serialNumber}`;
   els.statusPill.textContent = ticket.status;
   const sla = slaStatus(ticket);
   els.slaPill.textContent = sla.label;
@@ -256,11 +284,42 @@ function renderCards(ticket) {
   els.warrantyState.textContent = warranty;
   els.warrantyDates.textContent = `${formatDate(ticket.warrantyStart)} to ${formatDate(ticket.warrantyEnd)}`;
   els.upsState.textContent = ticket.upsStatus;
-  els.upsDates.textContent = `${ticket.upsTracking} · Delivered ${formatDate(ticket.deliveredAt)}`;
+  els.upsDates.textContent = `${ticket.upsTracking} - Delivered ${formatDate(ticket.deliveredAt)}`;
   els.slaState.textContent = sla.label;
   els.slaDates.textContent = sla.detail;
   els.chargeState.textContent = charge.label;
   els.chargeDetail.textContent = charge.detail;
+}
+
+function renderDetailSections(ticket) {
+  const warranty = warrantyStatus(ticket);
+  const sla = slaStatus(ticket);
+  els.warrantyDetails.innerHTML = detailRows([
+    ["Sales order", ticket.salesOrder],
+    ["Serial number", ticket.serialNumber],
+    ["Customer", ticket.customer],
+    ["Product", ticket.product],
+    ["Warranty start", formatDate(ticket.warrantyStart)],
+    ["Warranty end", formatDate(ticket.warrantyEnd)],
+    ["Coverage", warranty]
+  ]);
+  els.logisticsDetails.innerHTML = detailRows([
+    ["UPS tracking", ticket.upsTracking],
+    ["UPS status", ticket.upsStatus],
+    ["Shipped", formatDate(ticket.shippedAt)],
+    ["Delivered", formatDate(ticket.deliveredAt)],
+    ["Received", formatDate(ticket.receivedAt)],
+    ["SLA trigger", ticket.receivedAt ? "Machine received" : "Waiting for delivery"]
+  ]);
+  els.slaStart.textContent = formatDate(ticket.receivedAt);
+  els.slaWindow.textContent = `${ticket.repairSlaDays} working days`;
+  els.testingWindow.textContent = `${ticket.testingDays} calendar days`;
+  els.slaRisk.textContent = sla.label;
+  els.slaRiskDetail.textContent = sla.detail;
+}
+
+function detailRows(rows) {
+  return rows.map(([label, value]) => `<dt>${label}</dt><dd>${escapeHtml(String(value || "Not set"))}</dd>`).join("");
 }
 
 function renderTimeline(ticket) {
@@ -284,7 +343,7 @@ function renderLogs(ticket) {
     .reverse()
     .map((log) => `
       <article class="log-entry">
-        <div class="entry-meta">${log.author} · ${formatDate(log.date)}</div>
+        <div class="entry-meta">${log.author} - ${formatDate(log.date)}</div>
         <div>${escapeHtml(log.text)}</div>
         ${log.photo ? `<img src="${log.photo}" alt="Repair evidence" />` : ""}
       </article>
@@ -298,7 +357,7 @@ function renderMessages(ticket) {
     .reverse()
     .map((message) => `
       <article class="message-entry">
-        <div class="entry-meta">${message.author} · ${formatDate(message.date)}</div>
+        <div class="entry-meta">${message.author} - ${formatDate(message.date)}</div>
         <div>${escapeHtml(message.text)}</div>
       </article>
     `)
@@ -343,6 +402,15 @@ function renderAdmin(ticket) {
     .reverse()
     .map((entry) => `<div class="audit-entry"><div class="entry-meta">${formatDate(entry.date)}</div>${escapeHtml(entry.text)}</div>`)
     .join("");
+}
+
+function activateSection(sectionName) {
+  els.navItems.forEach((button) => {
+    button.classList.toggle("active", button.dataset.target === sectionName);
+  });
+  els.sections.forEach((section) => {
+    section.classList.toggle("active", section.dataset.section === sectionName);
+  });
 }
 
 function selectTicket(ticketId) {
@@ -391,6 +459,12 @@ els.roles.forEach((button) => {
     state.role = button.dataset.role;
     saveState();
     render();
+  });
+});
+
+els.navItems.forEach((button) => {
+  button.addEventListener("click", () => {
+    activateSection(button.dataset.target);
   });
 });
 

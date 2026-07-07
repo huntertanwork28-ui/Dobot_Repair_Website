@@ -3,170 +3,297 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Repair Tracking Portal</title>
+    <title>Dobot Repair Portal</title>
     <link rel="stylesheet" href="./src/styles.css" />
   </head>
   <body>
-    <header class="topbar">
-      <div>
-        <p class="eyebrow">After-Sales Service</p>
-        <h1>Repair Tracking Portal</h1>
-      </div>
-      <div class="role-switcher" aria-label="Role selector">
-        <button class="role active" data-role="customer">Customer</button>
-        <button class="role" data-role="engineer">Engineer</button>
-        <button class="role" data-role="admin">Admin</button>
-      </div>
-    </header>
-
-    <main class="shell">
-      <aside class="sidebar">
-        <section class="panel lookup-panel">
-          <h2>Lookup</h2>
-          <label for="lookupInput">Sales order, serial number, RMA, or tracking number</label>
-          <div class="lookup-row">
-            <input id="lookupInput" type="search" placeholder="SO-2026-1048" />
-            <button id="lookupButton">Search</button>
+    <div class="app-shell">
+      <aside class="nav-rail">
+        <div class="brand-block">
+          <div class="brand-mark">D</div>
+          <div>
+            <p class="eyebrow">Dobot Service</p>
+            <h1>Repair Portal</h1>
           </div>
-          <p class="hint">Try: SO-2026-1048, DR-CR20A-1129, RMA-1001, 1Z999AA10123456784</p>
-        </section>
+        </div>
 
-        <section class="panel ticket-list">
-          <div class="panel-title">
-            <h2>Open RMAs</h2>
-            <span id="ticketCount"></span>
-          </div>
-          <div id="ticketList"></div>
-        </section>
+        <nav class="section-nav" aria-label="Portal sections">
+          <button class="nav-item active" data-target="overview">Overview</button>
+          <button class="nav-item" data-target="cases">Cases</button>
+          <button class="nav-item" data-target="warranty">Warranty</button>
+          <button class="nav-item" data-target="logistics">Logistics</button>
+          <button class="nav-item" data-target="sla">SLA</button>
+          <button class="nav-item" data-target="repair">Repair Logs</button>
+          <button class="nav-item" data-target="parts">Parts & Pricing</button>
+          <button class="nav-item" data-target="messages">Messages</button>
+          <button class="nav-item admin-nav" data-target="admin">Admin</button>
+        </nav>
       </aside>
 
-      <section class="content">
-        <section class="hero panel">
-          <div>
-            <p class="eyebrow" id="ticketStatusLabel">Current repair case</p>
-            <h2 id="ticketTitle"></h2>
-            <p id="ticketSubtitle"></p>
-          </div>
-          <div class="status-stack">
-            <span class="status-pill" id="statusPill"></span>
-            <span class="sla-pill" id="slaPill"></span>
-          </div>
-        </section>
-
-        <section class="grid cards-grid">
-          <article class="panel metric-card">
-            <p>Warranty</p>
-            <strong id="warrantyState"></strong>
-            <span id="warrantyDates"></span>
-          </article>
-          <article class="panel metric-card">
-            <p>UPS Tracking</p>
-            <strong id="upsState"></strong>
-            <span id="upsDates"></span>
-          </article>
-          <article class="panel metric-card">
-            <p>Repair SLA</p>
-            <strong id="slaState"></strong>
-            <span id="slaDates"></span>
-          </article>
-          <article class="panel metric-card">
-            <p>Estimated Charge</p>
-            <strong id="chargeState"></strong>
-            <span id="chargeDetail"></span>
-          </article>
-        </section>
-
-        <section class="panel timeline-panel">
-          <div class="panel-title">
-            <h2>Repair Timeline</h2>
-            <button id="syncUpsButton" class="secondary">Sync UPS</button>
-          </div>
-          <div id="timeline"></div>
-        </section>
-
-        <section class="two-column">
-          <article class="panel">
-            <div class="panel-title">
-              <h2>Repair Log</h2>
-              <span class="role-note">Engineer updates, customer can read</span>
+      <div class="workspace">
+        <header class="topbar">
+          <div class="lookup-panel">
+            <label for="lookupInput">Search by sales order, serial, RMA, or UPS tracking</label>
+            <div class="lookup-row">
+              <input id="lookupInput" type="search" placeholder="SO-2026-1048" />
+              <button id="lookupButton">Search</button>
             </div>
-            <form id="logForm" class="stacked-form restricted engineer-only">
-              <label>
-                Work note
-                <textarea id="logText" rows="4" placeholder="Describe inspection, repair action, or next step"></textarea>
-              </label>
-              <label>
-                Photo evidence
-                <input id="logPhoto" type="file" accept="image/*" capture="environment" />
-              </label>
-              <button type="submit">Add daily update</button>
-            </form>
-            <div id="repairLogs" class="log-list"></div>
-          </article>
+          </div>
+          <div class="role-switcher" aria-label="Role selector">
+            <button class="role active" data-role="customer">Customer</button>
+            <button class="role" data-role="engineer">Engineer</button>
+            <button class="role" data-role="admin">Admin</button>
+          </div>
+        </header>
 
-          <article class="panel">
-            <div class="panel-title">
-              <h2>Customer Questions</h2>
-              <span class="role-note">Read-only case, message allowed</span>
+        <main class="content">
+          <section class="section-page active" data-section="overview">
+            <div class="hero">
+              <div>
+                <p class="eyebrow">Current repair case</p>
+                <h2 id="ticketTitle"></h2>
+                <p id="ticketSubtitle"></p>
+              </div>
+              <div class="status-stack">
+                <span class="status-pill" id="statusPill"></span>
+                <span class="sla-pill" id="slaPill"></span>
+              </div>
             </div>
-            <form id="messageForm" class="stacked-form">
-              <label>
-                Suggestion or question
-                <textarea id="messageText" rows="4" placeholder="Ask a question or add information for the engineer"></textarea>
-              </label>
-              <button type="submit">Send message</button>
-            </form>
-            <div id="messages" class="message-list"></div>
-          </article>
-        </section>
 
-        <section class="two-column">
-          <article class="panel restricted engineer-admin-only">
-            <div class="panel-title">
+            <div class="cards-grid">
+              <article class="panel metric-card">
+                <p>Warranty</p>
+                <strong id="warrantyState"></strong>
+                <span id="warrantyDates"></span>
+              </article>
+              <article class="panel metric-card">
+                <p>UPS Tracking</p>
+                <strong id="upsState"></strong>
+                <span id="upsDates"></span>
+              </article>
+              <article class="panel metric-card">
+                <p>Repair SLA</p>
+                <strong id="slaState"></strong>
+                <span id="slaDates"></span>
+              </article>
+              <article class="panel metric-card">
+                <p>Estimated Charge</p>
+                <strong id="chargeState"></strong>
+                <span id="chargeDetail"></span>
+              </article>
+            </div>
+
+            <section class="panel">
+              <div class="panel-title">
+                <div>
+                  <p class="section-kicker">Case progress</p>
+                  <h3>Repair Timeline</h3>
+                </div>
+                <button id="syncUpsButton" class="secondary">Sync UPS</button>
+              </div>
+              <div id="timeline"></div>
+            </section>
+          </section>
+
+          <section class="section-page" data-section="cases">
+            <div class="page-heading">
+              <p class="eyebrow">Case management</p>
+              <h2>Open RMA Cases</h2>
+              <p>Use this section to select a repair case and review the customer, product, status, and current ownership.</p>
+            </div>
+            <div class="panel">
+              <div class="panel-title">
+                <h3>Case Queue</h3>
+                <span id="ticketCount" class="count-label"></span>
+              </div>
+              <div id="ticketList" class="case-grid"></div>
+            </div>
+          </section>
+
+          <section class="section-page" data-section="warranty">
+            <div class="page-heading">
+              <p class="eyebrow">Sales order validation</p>
+              <h2>Warranty Status</h2>
+              <p>Confirm whether a service request is covered and allow authorized users to adjust warranty dates with audit history.</p>
+            </div>
+            <div class="split-grid">
+              <article class="panel detail-panel">
+                <h3>Warranty Details</h3>
+                <dl id="warrantyDetails" class="detail-list"></dl>
+              </article>
+              <article class="panel restricted admin-only">
+                <h3>Admin Warranty Control</h3>
+                <form id="adminForm" class="stacked-form">
+                  <label>
+                    Warranty expiration
+                    <input id="warrantyEndInput" type="date" />
+                  </label>
+                  <label>
+                    Repair SLA working days
+                    <input id="slaDaysInput" type="number" min="1" max="30" />
+                  </label>
+                  <label>
+                    Testing days
+                    <input id="testingDaysInput" type="number" min="0" max="14" />
+                  </label>
+                  <button type="submit">Save admin changes</button>
+                </form>
+              </article>
+            </div>
+          </section>
+
+          <section class="section-page" data-section="logistics">
+            <div class="page-heading">
+              <p class="eyebrow">Inbound and outbound shipment</p>
+              <h2>UPS Logistics</h2>
+              <p>Track inbound delivery and use delivered status to start the repair SLA timer.</p>
+            </div>
+            <div class="split-grid">
+              <article class="panel detail-panel">
+                <h3>Shipment Details</h3>
+                <dl id="logisticsDetails" class="detail-list"></dl>
+              </article>
+              <article class="panel">
+                <h3>UPS Workflow</h3>
+                <ol class="process-list">
+                  <li>Customer ships machine with UPS tracking number.</li>
+                  <li>UPS delivered status sets the machine received date.</li>
+                  <li>Repair SLA starts from the received date.</li>
+                  <li>Return tracking can be added after repair and testing.</li>
+                </ol>
+              </article>
+            </div>
+          </section>
+
+          <section class="section-page" data-section="sla">
+            <div class="page-heading">
+              <p class="eyebrow">Service discipline</p>
+              <h2>SLA Control</h2>
+              <p>Diagnosis and repair must complete within five working days by default. Testing is tracked separately.</p>
+            </div>
+            <div class="cards-grid compact">
+              <article class="panel metric-card">
+                <p>Timer Start</p>
+                <strong id="slaStart"></strong>
+                <span>Starts when the machine is received.</span>
+              </article>
+              <article class="panel metric-card">
+                <p>Repair Window</p>
+                <strong id="slaWindow"></strong>
+                <span>Working-day calculation excludes weekends.</span>
+              </article>
+              <article class="panel metric-card">
+                <p>Testing Stage</p>
+                <strong id="testingWindow"></strong>
+                <span>Shown to customer but excluded from repair SLA.</span>
+              </article>
+              <article class="panel metric-card">
+                <p>Current Risk</p>
+                <strong id="slaRisk"></strong>
+                <span id="slaRiskDetail"></span>
+              </article>
+            </div>
+          </section>
+
+          <section class="section-page" data-section="repair">
+            <div class="page-heading">
+              <p class="eyebrow">Engineer activity</p>
+              <h2>Daily Repair Logs</h2>
+              <p>Engineer updates are visible to customers, while editing remains limited to engineer and admin roles.</p>
+            </div>
+            <div class="split-grid">
+              <article class="panel">
+                <h3>Add Repair Update</h3>
+                <form id="logForm" class="stacked-form restricted engineer-only">
+                  <label>
+                    Work note
+                    <textarea id="logText" rows="5" placeholder="Describe inspection, repair action, test result, or next step"></textarea>
+                  </label>
+                  <label>
+                    Photo evidence
+                    <input id="logPhoto" type="file" accept="image/*" capture="environment" />
+                  </label>
+                  <button type="submit">Add daily update</button>
+                </form>
+                <p class="empty-note customer-log-note">Customers can read repair logs but cannot edit them.</p>
+              </article>
+              <article class="panel">
+                <h3>Repair History</h3>
+                <div id="repairLogs" class="log-list"></div>
+              </article>
+            </div>
+          </section>
+
+          <section class="section-page" data-section="parts">
+            <div class="page-heading">
+              <p class="eyebrow">Material and quote control</p>
               <h2>Parts & Pricing</h2>
-              <label class="inline-control">
-                Repair for
-                <select id="customerType">
-                  <option value="endCustomer">End customer</option>
-                  <option value="dealer">Dealer</option>
-                </select>
-              </label>
+              <p>Engineers can load a BOM and choose end-customer or dealer pricing for the repair quote.</p>
             </div>
-            <div class="parts-upload">
-              <label>
-                Upload BOM CSV
-                <input id="bomUpload" type="file" accept=".csv,text/csv" />
-              </label>
-              <p class="hint">Columns: partNumber, description, endCustomerPrice, dealerPrice</p>
-            </div>
-            <div id="partsCatalog" class="parts-table"></div>
-          </article>
+            <article class="panel restricted engineer-admin-only">
+              <div class="panel-title">
+                <h3>Parts Catalog</h3>
+                <label class="inline-control">
+                  Repair for
+                  <select id="customerType">
+                    <option value="endCustomer">End customer</option>
+                    <option value="dealer">Dealer</option>
+                  </select>
+                </label>
+              </div>
+              <div class="parts-upload">
+                <label>
+                  Upload BOM CSV
+                  <input id="bomUpload" type="file" accept=".csv,text/csv" />
+                </label>
+                <p class="hint">Columns: partNumber, description, endCustomerPrice, dealerPrice</p>
+              </div>
+              <div id="partsCatalog" class="parts-table"></div>
+            </article>
+            <article class="panel customer-parts-note">
+              <h3>Customer View</h3>
+              <p>Customers can see the estimated charge on the Overview tab. Detailed internal parts selection is limited to service staff.</p>
+            </article>
+          </section>
 
-          <article class="panel restricted admin-only">
-            <div class="panel-title">
-              <h2>Admin Controls</h2>
-              <span class="role-note">Warranty and SLA settings</span>
+          <section class="section-page" data-section="messages">
+            <div class="page-heading">
+              <p class="eyebrow">Customer communication</p>
+              <h2>Questions & Suggestions</h2>
+              <p>Customers can add questions or notes while keeping repair records read-only.</p>
             </div>
-            <form id="adminForm" class="stacked-form">
-              <label>
-                Warranty expiration
-                <input id="warrantyEndInput" type="date" />
-              </label>
-              <label>
-                Repair SLA working days
-                <input id="slaDaysInput" type="number" min="1" max="30" />
-              </label>
-              <label>
-                Testing days
-                <input id="testingDaysInput" type="number" min="0" max="14" />
-              </label>
-              <button type="submit">Save admin changes</button>
-            </form>
-            <div id="auditLog" class="audit-log"></div>
-          </article>
-        </section>
-      </section>
-    </main>
+            <div class="split-grid">
+              <article class="panel">
+                <h3>Send Message</h3>
+                <form id="messageForm" class="stacked-form">
+                  <label>
+                    Suggestion or question
+                    <textarea id="messageText" rows="5" placeholder="Ask a question or add information for the engineer"></textarea>
+                  </label>
+                  <button type="submit">Send message</button>
+                </form>
+              </article>
+              <article class="panel">
+                <h3>Message Thread</h3>
+                <div id="messages" class="message-list"></div>
+              </article>
+            </div>
+          </section>
+
+          <section class="section-page" data-section="admin">
+            <div class="page-heading">
+              <p class="eyebrow">Governance</p>
+              <h2>Admin Audit</h2>
+              <p>Track warranty edits, SLA changes, UPS syncs, repair logs, and pricing changes.</p>
+            </div>
+            <article class="panel restricted admin-only">
+              <h3>Audit Log</h3>
+              <div id="auditLog" class="audit-log"></div>
+            </article>
+          </section>
+        </main>
+      </div>
+    </div>
 
     <script src="./src/app.js" type="module"></script>
   </body>
