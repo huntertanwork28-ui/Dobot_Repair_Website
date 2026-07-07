@@ -16,13 +16,6 @@
           <p>Sign in to track repair cases, warranty status, logistics, SLA, and service communication.</p>
         </div>
 
-        <div class="auth-mode-tabs" aria-label="Account actions">
-          <button class="auth-mode active" data-auth-mode="signin" type="button">Sign in</button>
-          <button class="auth-mode" data-auth-mode="register" type="button">Create Account</button>
-          <button class="auth-mode" data-auth-mode="verify" type="button">Verify Email</button>
-          <button class="auth-mode" data-auth-mode="forgot" type="button">Forgot Password</button>
-        </div>
-
         <section class="auth-panel active" data-auth-panel="signin">
           <h2>Sign in</h2>
           <form id="loginForm" class="stacked-form">
@@ -37,6 +30,10 @@
             <button type="submit">Sign in to portal</button>
             <p id="loginError" class="form-error" aria-live="polite"></p>
           </form>
+          <div class="auth-links" aria-label="Account help">
+            <button class="auth-link" data-auth-mode="register" type="button">Create account</button>
+            <button class="auth-link" data-auth-mode="forgot" type="button">Forgot password?</button>
+          </div>
         </section>
 
         <section class="auth-panel" data-auth-panel="register">
@@ -66,9 +63,10 @@
               Notes
               <textarea id="registerNotes" rows="3" placeholder="Tell us which repair case or machine this account should access"></textarea>
             </label>
-            <button type="submit">Create account</button>
+            <button type="submit">Create account and verify email</button>
             <p id="registrationStatus" class="empty-note"></p>
           </form>
+          <button class="auth-back" data-auth-mode="signin" type="button">Back to sign in</button>
         </section>
 
         <section class="auth-panel" data-auth-panel="verify">
@@ -85,6 +83,7 @@
             <button type="submit">Verify email</button>
             <p id="verificationStatus" class="empty-note"></p>
           </form>
+          <button class="auth-back" data-auth-mode="signin" type="button">Back to sign in</button>
         </section>
 
         <section class="auth-panel" data-auth-panel="forgot">
@@ -94,7 +93,7 @@
               Work email
               <input id="forgotEmail" type="email" placeholder="name@company.com" required />
             </label>
-            <button type="submit" class="secondary">Send reset code</button>
+            <button type="submit" class="secondary">Send verification code</button>
             <p id="forgotPasswordStatus" class="empty-note"></p>
           </form>
 
@@ -104,16 +103,17 @@
               <input id="resetEmail" type="email" placeholder="name@company.com" required />
             </label>
             <label>
-              Reset code
+              Verification code
               <input id="resetCode" type="text" placeholder="6-digit code" required />
             </label>
             <label>
               New password
               <input id="resetPassword" type="password" placeholder="Create new password" required />
             </label>
-            <button type="submit">Reset password</button>
+            <button type="submit">Verify and reset password</button>
             <p id="resetPasswordStatus" class="empty-note"></p>
           </form>
+          <button class="auth-back" data-auth-mode="signin" type="button">Back to sign in</button>
         </section>
       </article>
     </section>

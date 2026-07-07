@@ -1,4 +1,4 @@
-const STORAGE_KEY = "repair-tracking-portal-state-v10";
+const STORAGE_KEY = "repair-tracking-portal-state-v12";
 const SESSION_KEY = "repair-tracking-portal-session-v1";
 
 const seedState = {
@@ -133,7 +133,7 @@ const els = {
   loginEmail: document.querySelector("#loginEmail"),
   loginPassword: document.querySelector("#loginPassword"),
   loginError: document.querySelector("#loginError"),
-  authModes: document.querySelectorAll(".auth-mode"),
+  authModeTriggers: document.querySelectorAll("[data-auth-mode]"),
   authPanels: document.querySelectorAll(".auth-panel"),
   registrationForm: document.querySelector("#registrationForm"),
   registerCompany: document.querySelector("#registerCompany"),
@@ -631,12 +631,12 @@ function registerUser({ company, name, email, password, reference, notes }) {
 }
 
 function activateAuthMode(mode) {
-  els.authModes.forEach((button) => {
-    button.classList.toggle("active", button.dataset.authMode === mode);
-  });
   els.authPanels.forEach((panel) => {
     panel.classList.toggle("active", panel.dataset.authPanel === mode);
   });
+  if (mode !== "forgot") {
+    els.resetPasswordForm.classList.remove("active");
+  }
 }
 
 function createPasswordReset(email) {
@@ -698,7 +698,7 @@ function parseCsv(text) {
     .map((line) => line.split(",").map((cell) => cell.trim()));
 }
 
-els.authModes.forEach((button) => {
+els.authModeTriggers.forEach((button) => {
   button.addEventListener("click", () => {
     activateAuthMode(button.dataset.authMode);
   });
@@ -751,7 +751,7 @@ els.registrationForm.addEventListener("submit", (event) => {
   }
   els.verifyEmail.value = els.registerEmail.value.trim().toLowerCase();
   els.registrationForm.reset();
-  els.registrationStatus.textContent = `Request ${result.request.id} submitted. Verification code: ${result.verificationCode}`;
+  els.registrationStatus.textContent = `Request ${result.request.id} submitted. Email verification code: ${result.verificationCode}`;
   activateAuthMode("verify");
   renderAuthGate();
 });
@@ -789,10 +789,12 @@ els.forgotPasswordForm.addEventListener("submit", (event) => {
   const result = createPasswordReset(email);
   if (result.error) {
     els.forgotPasswordStatus.textContent = result.error;
+    els.resetPasswordForm.classList.remove("active");
     return;
   }
   els.resetEmail.value = email;
-  els.forgotPasswordStatus.textContent = `Password reset code: ${result.resetCode}`;
+  els.forgotPasswordStatus.textContent = `Email verification code: ${result.resetCode}`;
+  els.resetPasswordForm.classList.add("active");
 });
 
 els.resetPasswordForm.addEventListener("submit", (event) => {
@@ -813,6 +815,7 @@ els.resetPasswordForm.addEventListener("submit", (event) => {
   saveState();
   els.resetPasswordForm.reset();
   els.forgotPasswordForm.reset();
+  els.resetPasswordForm.classList.remove("active");
   els.loginEmail.value = email;
   els.resetPasswordStatus.textContent = "Password updated. You can now sign in.";
   activateAuthMode("signin");
