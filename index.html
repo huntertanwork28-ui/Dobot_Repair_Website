@@ -28,14 +28,6 @@
               Password
               <input id="loginPassword" type="password" placeholder="Enter password" required />
             </label>
-            <label>
-              Access role
-              <select id="loginRole">
-                <option value="customer">Customer</option>
-                <option value="engineer">Engineer</option>
-                <option value="admin">Admin</option>
-              </select>
-            </label>
             <button type="submit">Sign in to portal</button>
             <p id="loginError" class="form-error" aria-live="polite"></p>
           </form>
@@ -45,32 +37,49 @@
           <div class="panel-title">
             <div>
               <p class="eyebrow">Need access?</p>
-              <h3>Request an Account</h3>
+              <h3>Register Account</h3>
             </div>
           </div>
-          <form id="publicAccountRequestForm" class="stacked-form">
+          <form id="registrationForm" class="stacked-form">
             <label>
               Company name
-              <input id="publicRequestCompany" type="text" placeholder="Company legal name" required />
+              <input id="registerCompany" type="text" placeholder="Company legal name" required />
             </label>
             <label>
               Contact name
-              <input id="publicRequestName" type="text" placeholder="Full name" required />
+              <input id="registerName" type="text" placeholder="Full name" required />
             </label>
             <label>
               Work email
-              <input id="publicRequestEmail" type="email" placeholder="name@company.com" required />
+              <input id="registerEmail" type="email" placeholder="name@company.com" required />
+            </label>
+            <label>
+              Password
+              <input id="registerPassword" type="password" placeholder="Create password" required />
             </label>
             <label>
               Sales order or serial number
-              <input id="publicRequestReference" type="text" placeholder="SO-2026-1048 or DR-CR20A-1129" required />
+              <input id="registerReference" type="text" placeholder="SO-2026-1048 or DR-CR20A-1129" required />
             </label>
             <label>
               Notes
-              <textarea id="publicRequestNotes" rows="3" placeholder="Tell us which repair case or machine this account should access"></textarea>
+              <textarea id="registerNotes" rows="3" placeholder="Tell us which repair case or machine this account should access"></textarea>
             </label>
-            <button type="submit" class="secondary">Submit access request</button>
-            <p id="publicRequestStatus" class="empty-note"></p>
+            <button type="submit" class="secondary">Create account</button>
+            <p id="registrationStatus" class="empty-note"></p>
+          </form>
+
+          <form id="verificationForm" class="stacked-form verification-form">
+            <label>
+              Email
+              <input id="verifyEmail" type="email" placeholder="name@company.com" required />
+            </label>
+            <label>
+              Verification code
+              <input id="verifyCode" type="text" placeholder="6-digit code" required />
+            </label>
+            <button type="submit" class="secondary">Verify email</button>
+            <p id="verificationStatus" class="empty-note"></p>
           </form>
         </article>
       </div>
@@ -109,13 +118,9 @@
               <button id="lookupButton">Search</button>
             </div>
           </div>
-          <div class="role-switcher" aria-label="Role selector">
-            <button class="role active" data-role="customer">Customer</button>
-            <button class="role" data-role="engineer">Engineer</button>
-            <button class="role" data-role="admin">Admin</button>
-          </div>
           <div class="session-actions">
             <span id="sessionUser" class="session-user"></span>
+            <span id="sessionRole" class="badge"></span>
             <button id="logoutButton" class="secondary">Sign out</button>
           </div>
         </header>

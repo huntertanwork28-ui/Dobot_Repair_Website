@@ -1,9 +1,35 @@
-const STORAGE_KEY = "repair-tracking-portal-state-v6";
+const STORAGE_KEY = "repair-tracking-portal-state-v8";
 const SESSION_KEY = "repair-tracking-portal-session-v1";
 
 const seedState = {
   role: "customer",
   selectedTicketId: "RMA-1001",
+  users: [
+    {
+      email: "customer@example.com",
+      password: "demo123",
+      role: "customer",
+      verified: true,
+      name: "Demo Customer",
+      company: "Acme Packaging"
+    },
+    {
+      email: "engineer@dobot.demo",
+      password: "demo123",
+      role: "engineer",
+      verified: true,
+      name: "Demo Engineer",
+      company: "Dobot Service"
+    },
+    {
+      email: "admin@dobot.demo",
+      password: "demo123",
+      role: "admin",
+      verified: true,
+      name: "Demo Admin",
+      company: "Dobot Service"
+    }
+  ],
   accountRequests: [
     {
       id: "AR-1001",
@@ -106,18 +132,21 @@ const els = {
   loginForm: document.querySelector("#loginForm"),
   loginEmail: document.querySelector("#loginEmail"),
   loginPassword: document.querySelector("#loginPassword"),
-  loginRole: document.querySelector("#loginRole"),
   loginError: document.querySelector("#loginError"),
-  publicAccountRequestForm: document.querySelector("#publicAccountRequestForm"),
-  publicRequestCompany: document.querySelector("#publicRequestCompany"),
-  publicRequestName: document.querySelector("#publicRequestName"),
-  publicRequestEmail: document.querySelector("#publicRequestEmail"),
-  publicRequestReference: document.querySelector("#publicRequestReference"),
-  publicRequestNotes: document.querySelector("#publicRequestNotes"),
-  publicRequestStatus: document.querySelector("#publicRequestStatus"),
+  registrationForm: document.querySelector("#registrationForm"),
+  registerCompany: document.querySelector("#registerCompany"),
+  registerName: document.querySelector("#registerName"),
+  registerEmail: document.querySelector("#registerEmail"),
+  registerPassword: document.querySelector("#registerPassword"),
+  registerReference: document.querySelector("#registerReference"),
+  registerNotes: document.querySelector("#registerNotes"),
+  registrationStatus: document.querySelector("#registrationStatus"),
+  verificationForm: document.querySelector("#verificationForm"),
+  verifyEmail: document.querySelector("#verifyEmail"),
+  verifyCode: document.querySelector("#verifyCode"),
+  verificationStatus: document.querySelector("#verificationStatus"),
   navItems: document.querySelectorAll(".nav-item"),
   sections: document.querySelectorAll(".section-page"),
-  roles: document.querySelectorAll(".role"),
   lookupInput: document.querySelector("#lookupInput"),
   lookupButton: document.querySelector("#lookupButton"),
   ticketList: document.querySelector("#ticketList"),
@@ -169,20 +198,32 @@ const els = {
   testingDaysInput: document.querySelector("#testingDaysInput"),
   auditLog: document.querySelector("#auditLog"),
   sessionUser: document.querySelector("#sessionUser"),
+  sessionRole: document.querySelector("#sessionRole"),
   logoutButton: document.querySelector("#logoutButton")
 };
 
 function loadState() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    return saved || structuredClone(seedState);
+    return normalizeState(saved || structuredClone(seedState));
   } catch {
-    return structuredClone(seedState);
+    return normalizeState(structuredClone(seedState));
   }
 }
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function normalizeState(nextState) {
+  return {
+    ...structuredClone(seedState),
+    ...nextState,
+    users: nextState?.users || structuredClone(seedState.users),
+    accountRequests: nextState?.accountRequests || structuredClone(seedState.accountRequests),
+    parts: nextState?.parts || structuredClone(seedState.parts),
+    tickets: nextState?.tickets || structuredClone(seedState.tickets)
+  };
 }
 
 function loadSession() {
@@ -204,6 +245,10 @@ function saveSession(nextSession) {
 
 function selectedTicket() {
   return state.tickets.find((ticket) => ticket.id === state.selectedTicketId) || state.tickets[0];
+}
+
+function findUser(email) {
+  return (state.users || []).find((user) => user.email.toLowerCase() === email.trim().toLowerCase());
 }
 
 function formatDate(value) {
@@ -268,7 +313,6 @@ function render() {
   if (!session) return;
   const ticket = selectedTicket();
   renderNavigation();
-  renderRoles();
   renderVisibility();
   renderTicketList();
   renderHeader(ticket);
@@ -287,7 +331,9 @@ function renderAuthGate() {
   els.portalApp.classList.toggle("is-hidden", !session);
   if (!session) return;
   state.role = session.role;
-  els.sessionUser.textContent = `${session.email} - ${session.role}`;
+  els.sessionUser.textContent = session.email;
+  els.sessionRole.textContent = session.role;
+  els.sessionRole.className = `badge ${session.role}`;
 }
 
 function renderNavigation() {
@@ -299,12 +345,6 @@ function renderNavigation() {
   if (state.role !== "admin" && adminSection?.classList.contains("active")) {
     activateSection("overview");
   }
-}
-
-function renderRoles() {
-  els.roles.forEach((button) => {
-    button.classList.toggle("active", button.dataset.role === state.role);
-  });
 }
 
 function renderVisibility() {
@@ -542,6 +582,44 @@ function createAccountRequest({ company, name, email, phone = "", reference, acc
   return request;
 }
 
+function createVerificationCode() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+function registerUser({ company, name, email, password, reference, notes }) {
+  const normalizedEmail = email.trim().toLowerCase();
+  const existingUser = findUser(normalizedEmail);
+  if (existingUser?.verified) {
+    return { error: "An account already exists for this email." };
+  }
+
+  const verificationCode = createVerificationCode();
+  const user = {
+    email: normalizedEmail,
+    password,
+    role: existingUser?.role || "customer",
+    verified: false,
+    verificationCode,
+    name,
+    company
+  };
+
+  state.users = existingUser
+    ? state.users.map((item) => (item.email.toLowerCase() === normalizedEmail ? { ...item, ...user } : item))
+    : [...(state.users || []), user];
+
+  const request = createAccountRequest({
+    company,
+    name,
+    email: normalizedEmail,
+    reference,
+    notes,
+    accessType: "Customer"
+  });
+  saveState();
+  return { request, verificationCode };
+}
+
 function activateSection(sectionName) {
   els.navItems.forEach((button) => {
     button.classList.toggle("active", button.dataset.target === sectionName);
@@ -592,15 +670,6 @@ function parseCsv(text) {
     .map((line) => line.split(",").map((cell) => cell.trim()));
 }
 
-els.roles.forEach((button) => {
-  button.addEventListener("click", () => {
-    state.role = button.dataset.role;
-    if (session) saveSession({ ...session, role: state.role });
-    saveState();
-    render();
-  });
-});
-
 els.loginForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const email = els.loginEmail.value.trim().toLowerCase();
@@ -609,8 +678,17 @@ els.loginForm.addEventListener("submit", (event) => {
     els.loginError.textContent = "Email and password are required.";
     return;
   }
-  saveSession({ email, role: els.loginRole.value });
-  state.role = els.loginRole.value;
+  const user = findUser(email);
+  if (!user || user.password !== password) {
+    els.loginError.textContent = "Invalid email or password.";
+    return;
+  }
+  if (!user.verified) {
+    els.loginError.textContent = "Please verify this email before signing in.";
+    return;
+  }
+  saveSession({ email: user.email, role: user.role });
+  state.role = user.role;
   els.loginError.textContent = "";
   els.loginPassword.value = "";
   saveState();
@@ -623,18 +701,49 @@ els.logoutButton.addEventListener("click", () => {
   render();
 });
 
-els.publicAccountRequestForm.addEventListener("submit", (event) => {
+els.registrationForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  const request = createAccountRequest({
-    company: els.publicRequestCompany.value.trim(),
-    name: els.publicRequestName.value.trim(),
-    email: els.publicRequestEmail.value.trim(),
-    reference: els.publicRequestReference.value.trim(),
-    notes: els.publicRequestNotes.value.trim()
+  const result = registerUser({
+    company: els.registerCompany.value.trim(),
+    name: els.registerName.value.trim(),
+    email: els.registerEmail.value.trim(),
+    password: els.registerPassword.value.trim(),
+    reference: els.registerReference.value.trim(),
+    notes: els.registerNotes.value.trim()
   });
-  els.publicAccountRequestForm.reset();
-  els.publicRequestStatus.textContent = `Request ${request.id} submitted for review.`;
+  if (result.error) {
+    els.registrationStatus.textContent = result.error;
+    return;
+  }
+  els.verifyEmail.value = els.registerEmail.value.trim().toLowerCase();
+  els.registrationForm.reset();
+  els.registrationStatus.textContent = `Request ${result.request.id} submitted. Verification code: ${result.verificationCode}`;
   renderAuthGate();
+});
+
+els.verificationForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const email = els.verifyEmail.value.trim().toLowerCase();
+  const code = els.verifyCode.value.trim();
+  const user = findUser(email);
+  if (!user) {
+    els.verificationStatus.textContent = "No account found for this email.";
+    return;
+  }
+  if (user.verified) {
+    els.verificationStatus.textContent = "This email is already verified.";
+    return;
+  }
+  if (user.verificationCode !== code) {
+    els.verificationStatus.textContent = "Verification code does not match.";
+    return;
+  }
+  user.verified = true;
+  delete user.verificationCode;
+  selectedTicket().audit.push({ date: todayIso(), text: `Email verified for ${email}.` });
+  saveState();
+  els.verificationForm.reset();
+  els.verificationStatus.textContent = "Email verified. You can now sign in.";
 });
 
 els.navItems.forEach((button) => {

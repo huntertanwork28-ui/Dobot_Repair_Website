@@ -174,6 +174,12 @@ textarea {
   font-weight: 700;
 }
 
+.verification-form {
+  border-top: 1px solid var(--line-soft);
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+
 .app-shell {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
@@ -290,29 +296,6 @@ textarea {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 0.5rem;
   margin-top: 0.5rem;
-}
-
-.role-switcher {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(92px, 1fr));
-  gap: 0.35rem;
-  background: #eef2f7;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 0.3rem;
-}
-
-.role {
-  background: transparent;
-  color: var(--muted);
-  border-radius: 6px;
-  padding: 0.58rem 0.7rem;
-}
-
-.role:hover,
-.role.active {
-  background: var(--blue);
-  color: #fff;
 }
 
 .session-actions {
@@ -448,6 +431,21 @@ textarea {
 .badge.rejected {
   color: var(--red);
   background: var(--soft-red);
+}
+
+.badge.customer {
+  color: var(--blue);
+  background: var(--soft-blue);
+}
+
+.badge.engineer {
+  color: var(--cyan);
+  background: #e7f8fd;
+}
+
+.badge.admin {
+  color: var(--green);
+  background: var(--soft-green);
 }
 
 .panel {
@@ -858,7 +856,6 @@ textarea {
   }
 
   .lookup-row,
-  .role-switcher,
   .cards-grid,
   .cards-grid.compact {
     grid-template-columns: 1fr;
