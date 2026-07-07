@@ -342,6 +342,21 @@ textarea {
   background: var(--soft-red);
 }
 
+.badge.pending {
+  color: var(--amber);
+  background: var(--soft-amber);
+}
+
+.badge.approved {
+  color: var(--green);
+  background: var(--soft-green);
+}
+
+.badge.rejected {
+  color: var(--red);
+  background: var(--soft-red);
+}
+
 .panel {
   padding: 1rem;
 }
@@ -527,18 +542,68 @@ textarea {
 
 .log-list,
 .message-list,
-.audit-log {
+.audit-log,
+.request-list {
   display: grid;
   gap: 0.75rem;
 }
 
 .log-entry,
 .message-entry,
-.audit-entry {
+.audit-entry,
+.request-card {
   border: 1px solid var(--line-soft);
   background: #f8fafc;
   border-radius: 8px;
   padding: 0.82rem;
+}
+
+.request-card {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.request-card-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.request-card-header strong,
+.request-card-header span {
+  display: block;
+}
+
+.request-card-header span {
+  color: var(--muted);
+  font-size: 0.86rem;
+  margin-top: 0.15rem;
+}
+
+.mini-detail-list {
+  display: grid;
+  grid-template-columns: 112px 1fr;
+  gap: 0.35rem 0.75rem;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.mini-detail-list dt,
+.mini-detail-list dd {
+  margin: 0;
+}
+
+.mini-detail-list dt {
+  color: var(--subtle);
+  font-weight: 800;
+}
+
+.request-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .log-entry img {
@@ -696,8 +761,13 @@ textarea {
   }
 
   .detail-list,
+  .mini-detail-list,
   .timeline-item {
     grid-template-columns: 1fr;
+  }
+
+  .request-card-header {
+    flex-direction: column;
   }
 
   .detail-list dt {

@@ -26,6 +26,7 @@
           <button class="nav-item" data-target="repair">Repair Logs</button>
           <button class="nav-item" data-target="parts">Parts & Pricing</button>
           <button class="nav-item" data-target="messages">Messages</button>
+          <button class="nav-item" data-target="account">Account Request</button>
           <button class="nav-item admin-nav" data-target="admin">Admin</button>
         </nav>
       </aside>
@@ -280,16 +281,73 @@
             </div>
           </section>
 
+          <section class="section-page" data-section="account">
+            <div class="page-heading">
+              <p class="eyebrow">Customer access</p>
+              <h2>Request an Account</h2>
+              <p>Submit access details so the service team can verify the company, sales order, and repair access before enabling the account.</p>
+            </div>
+            <div class="split-grid">
+              <article class="panel">
+                <h3>Account Application</h3>
+                <form id="accountRequestForm" class="stacked-form">
+                  <label>
+                    Company name
+                    <input id="requestCompany" type="text" placeholder="Company legal name" required />
+                  </label>
+                  <label>
+                    Contact name
+                    <input id="requestName" type="text" placeholder="Full name" required />
+                  </label>
+                  <label>
+                    Work email
+                    <input id="requestEmail" type="email" placeholder="name@company.com" required />
+                  </label>
+                  <label>
+                    Phone
+                    <input id="requestPhone" type="tel" placeholder="+1 555 0100" />
+                  </label>
+                  <label>
+                    Sales order or serial number
+                    <input id="requestReference" type="text" placeholder="SO-2026-1048 or DR-CR20A-1129" required />
+                  </label>
+                  <label>
+                    Requested access type
+                    <select id="requestAccessType">
+                      <option value="Customer">Customer</option>
+                      <option value="Dealer">Dealer</option>
+                    </select>
+                  </label>
+                  <label>
+                    Notes
+                    <textarea id="requestNotes" rows="4" placeholder="Tell us which repair case or machine this account should access"></textarea>
+                  </label>
+                  <button type="submit">Submit account request</button>
+                </form>
+              </article>
+              <article class="panel">
+                <h3>Request Status</h3>
+                <div id="accountRequestStatus" class="request-list"></div>
+              </article>
+            </div>
+          </section>
+
           <section class="section-page" data-section="admin">
             <div class="page-heading">
               <p class="eyebrow">Governance</p>
               <h2>Admin Audit</h2>
               <p>Track warranty edits, SLA changes, UPS syncs, repair logs, and pricing changes.</p>
             </div>
-            <article class="panel restricted admin-only">
-              <h3>Audit Log</h3>
-              <div id="auditLog" class="audit-log"></div>
-            </article>
+            <div class="split-grid">
+              <article class="panel restricted admin-only">
+                <h3>Account Request Queue</h3>
+                <div id="accountRequestQueue" class="request-list"></div>
+              </article>
+              <article class="panel restricted admin-only">
+                <h3>Audit Log</h3>
+                <div id="auditLog" class="audit-log"></div>
+              </article>
+            </div>
           </section>
         </main>
       </div>

@@ -1,8 +1,22 @@
-const STORAGE_KEY = "repair-tracking-portal-state-v2";
+const STORAGE_KEY = "repair-tracking-portal-state-v4";
 
 const seedState = {
   role: "customer",
   selectedTicketId: "RMA-1001",
+  accountRequests: [
+    {
+      id: "AR-1001",
+      company: "Acme Packaging",
+      name: "Jordan Lee",
+      email: "jordan.lee@acmepackaging.com",
+      phone: "+1 555 0104",
+      reference: "SO-2026-1048",
+      accessType: "Customer",
+      notes: "Needs access to the active CR20A repair case.",
+      status: "Pending",
+      submittedAt: "2026-07-07"
+    }
+  ],
   parts: [
     { partNumber: "CR20A-VAC-01", description: "Vacuum gripper seal kit", endCustomerPrice: 126, dealerPrice: 88 },
     { partNumber: "CR-CBL-J6", description: "Internal wrist cable assembly", endCustomerPrice: 240, dealerPrice: 168 },
@@ -123,6 +137,16 @@ const els = {
   customerType: document.querySelector("#customerType"),
   bomUpload: document.querySelector("#bomUpload"),
   partsCatalog: document.querySelector("#partsCatalog"),
+  accountRequestForm: document.querySelector("#accountRequestForm"),
+  requestCompany: document.querySelector("#requestCompany"),
+  requestName: document.querySelector("#requestName"),
+  requestEmail: document.querySelector("#requestEmail"),
+  requestPhone: document.querySelector("#requestPhone"),
+  requestReference: document.querySelector("#requestReference"),
+  requestAccessType: document.querySelector("#requestAccessType"),
+  requestNotes: document.querySelector("#requestNotes"),
+  accountRequestStatus: document.querySelector("#accountRequestStatus"),
+  accountRequestQueue: document.querySelector("#accountRequestQueue"),
   adminForm: document.querySelector("#adminForm"),
   warrantyEndInput: document.querySelector("#warrantyEndInput"),
   slaDaysInput: document.querySelector("#slaDaysInput"),
@@ -217,6 +241,7 @@ function render() {
   renderLogs(ticket);
   renderMessages(ticket);
   renderParts(ticket);
+  renderAccountRequests();
   renderAdmin(ticket);
 }
 
@@ -404,6 +429,54 @@ function renderAdmin(ticket) {
     .join("");
 }
 
+function renderAccountRequests() {
+  const requests = state.accountRequests || [];
+  els.accountRequestStatus.innerHTML = requests.length
+    ? requests
+        .slice()
+        .reverse()
+        .map((request) => accountRequestCard(request, false))
+        .join("")
+    : `<p class="empty-note">No account requests have been submitted yet.</p>`;
+
+  els.accountRequestQueue.innerHTML = requests.length
+    ? requests
+        .slice()
+        .reverse()
+        .map((request) => accountRequestCard(request, true))
+        .join("")
+    : `<p class="empty-note">No pending account requests.</p>`;
+}
+
+function accountRequestCard(request, includeActions) {
+  const actions = includeActions
+    ? `<div class="request-actions">
+        <button class="secondary" data-request-action="Approved" data-request-id="${request.id}">Approve</button>
+        <button class="secondary" data-request-action="Rejected" data-request-id="${request.id}">Reject</button>
+      </div>`
+    : "";
+  return `
+    <article class="request-card">
+      <div class="request-card-header">
+        <div>
+          <strong>${escapeHtml(request.company)}</strong>
+          <span>${escapeHtml(request.name)} - ${escapeHtml(request.email)}</span>
+        </div>
+        <span class="badge ${request.status.toLowerCase()}">${escapeHtml(request.status)}</span>
+      </div>
+      <dl class="mini-detail-list">
+        <dt>Request ID</dt><dd>${escapeHtml(request.id)}</dd>
+        <dt>Access</dt><dd>${escapeHtml(request.accessType)}</dd>
+        <dt>Reference</dt><dd>${escapeHtml(request.reference)}</dd>
+        <dt>Submitted</dt><dd>${formatDate(request.submittedAt)}</dd>
+        <dt>Phone</dt><dd>${escapeHtml(request.phone || "Not provided")}</dd>
+        <dt>Notes</dt><dd>${escapeHtml(request.notes || "No notes")}</dd>
+      </dl>
+      ${actions}
+    </article>
+  `;
+}
+
 function activateSection(sectionName) {
   els.navItems.forEach((button) => {
     button.classList.toggle("active", button.dataset.target === sectionName);
@@ -551,6 +624,39 @@ els.bomUpload.addEventListener("change", async () => {
     dealerPrice: Number(row[indexes.dealerPrice] || row[3] || 0)
   }));
   selectedTicket().audit.push({ date: todayIso(), text: `BOM uploaded from ${file.name}.` });
+  saveState();
+  render();
+});
+
+els.accountRequestForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const nextId = `AR-${String(1001 + (state.accountRequests || []).length).padStart(4, "0")}`;
+  const request = {
+    id: nextId,
+    company: els.requestCompany.value.trim(),
+    name: els.requestName.value.trim(),
+    email: els.requestEmail.value.trim(),
+    phone: els.requestPhone.value.trim(),
+    reference: els.requestReference.value.trim(),
+    accessType: els.requestAccessType.value,
+    notes: els.requestNotes.value.trim(),
+    status: "Pending",
+    submittedAt: todayIso()
+  };
+  state.accountRequests = [...(state.accountRequests || []), request];
+  selectedTicket().audit.push({ date: todayIso(), text: `Account request submitted: ${request.id}.` });
+  els.accountRequestForm.reset();
+  saveState();
+  render();
+});
+
+els.accountRequestQueue.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-request-action]");
+  if (!button) return;
+  const request = (state.accountRequests || []).find((item) => item.id === button.dataset.requestId);
+  if (!request) return;
+  request.status = button.dataset.requestAction;
+  selectedTicket().audit.push({ date: todayIso(), text: `Account request ${request.id} marked ${request.status}.` });
   saveState();
   render();
 });
