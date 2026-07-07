@@ -1,4 +1,4 @@
-# Repair Tracking Portal
+# Dobot Repair Website
 
 Customer-facing repair status portal MVP for RMA tracking, warranty checks, UPS logistics status, SLA timing, BOM-based repair pricing, customer questions, and mobile-friendly repair logs.
 
