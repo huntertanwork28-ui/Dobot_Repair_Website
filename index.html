@@ -7,7 +7,76 @@
     <link rel="stylesheet" href="./src/styles.css" />
   </head>
   <body>
-    <div class="app-shell">
+    <section id="authScreen" class="auth-screen">
+      <div class="auth-brand-panel">
+        <div class="brand-mark large">D</div>
+        <p class="eyebrow">Dobot Service</p>
+        <h1>Repair Portal</h1>
+        <p>Secure access for repair tracking, warranty validation, logistics updates, parts review, and service communication.</p>
+      </div>
+
+      <div class="auth-card-stack">
+        <article class="auth-card">
+          <p class="eyebrow">Authorized users</p>
+          <h2>Sign in</h2>
+          <form id="loginForm" class="stacked-form">
+            <label>
+              Work email
+              <input id="loginEmail" type="email" placeholder="name@company.com" required />
+            </label>
+            <label>
+              Password
+              <input id="loginPassword" type="password" placeholder="Enter password" required />
+            </label>
+            <label>
+              Access role
+              <select id="loginRole">
+                <option value="customer">Customer</option>
+                <option value="engineer">Engineer</option>
+                <option value="admin">Admin</option>
+              </select>
+            </label>
+            <button type="submit">Sign in to portal</button>
+            <p id="loginError" class="form-error" aria-live="polite"></p>
+          </form>
+        </article>
+
+        <article class="auth-card secondary-card">
+          <div class="panel-title">
+            <div>
+              <p class="eyebrow">Need access?</p>
+              <h3>Request an Account</h3>
+            </div>
+          </div>
+          <form id="publicAccountRequestForm" class="stacked-form">
+            <label>
+              Company name
+              <input id="publicRequestCompany" type="text" placeholder="Company legal name" required />
+            </label>
+            <label>
+              Contact name
+              <input id="publicRequestName" type="text" placeholder="Full name" required />
+            </label>
+            <label>
+              Work email
+              <input id="publicRequestEmail" type="email" placeholder="name@company.com" required />
+            </label>
+            <label>
+              Sales order or serial number
+              <input id="publicRequestReference" type="text" placeholder="SO-2026-1048 or DR-CR20A-1129" required />
+            </label>
+            <label>
+              Notes
+              <textarea id="publicRequestNotes" rows="3" placeholder="Tell us which repair case or machine this account should access"></textarea>
+            </label>
+            <button type="submit" class="secondary">Submit access request</button>
+            <p id="publicRequestStatus" class="empty-note"></p>
+          </form>
+        </article>
+      </div>
+    </section>
+
+    <div id="portalApp" class="app-shell is-hidden">
       <aside class="nav-rail">
         <div class="brand-block">
           <div class="brand-mark">D</div>
@@ -44,6 +113,10 @@
             <button class="role active" data-role="customer">Customer</button>
             <button class="role" data-role="engineer">Engineer</button>
             <button class="role" data-role="admin">Admin</button>
+          </div>
+          <div class="session-actions">
+            <span id="sessionUser" class="session-user"></span>
+            <button id="logoutButton" class="secondary">Sign out</button>
           </div>
         </header>
 

@@ -1,4 +1,5 @@
-const STORAGE_KEY = "repair-tracking-portal-state-v4";
+const STORAGE_KEY = "repair-tracking-portal-state-v6";
+const SESSION_KEY = "repair-tracking-portal-session-v1";
 
 const seedState = {
   role: "customer",
@@ -97,8 +98,23 @@ const seedState = {
 };
 
 let state = loadState();
+let session = loadSession();
 
 const els = {
+  authScreen: document.querySelector("#authScreen"),
+  portalApp: document.querySelector("#portalApp"),
+  loginForm: document.querySelector("#loginForm"),
+  loginEmail: document.querySelector("#loginEmail"),
+  loginPassword: document.querySelector("#loginPassword"),
+  loginRole: document.querySelector("#loginRole"),
+  loginError: document.querySelector("#loginError"),
+  publicAccountRequestForm: document.querySelector("#publicAccountRequestForm"),
+  publicRequestCompany: document.querySelector("#publicRequestCompany"),
+  publicRequestName: document.querySelector("#publicRequestName"),
+  publicRequestEmail: document.querySelector("#publicRequestEmail"),
+  publicRequestReference: document.querySelector("#publicRequestReference"),
+  publicRequestNotes: document.querySelector("#publicRequestNotes"),
+  publicRequestStatus: document.querySelector("#publicRequestStatus"),
   navItems: document.querySelectorAll(".nav-item"),
   sections: document.querySelectorAll(".section-page"),
   roles: document.querySelectorAll(".role"),
@@ -151,7 +167,9 @@ const els = {
   warrantyEndInput: document.querySelector("#warrantyEndInput"),
   slaDaysInput: document.querySelector("#slaDaysInput"),
   testingDaysInput: document.querySelector("#testingDaysInput"),
-  auditLog: document.querySelector("#auditLog")
+  auditLog: document.querySelector("#auditLog"),
+  sessionUser: document.querySelector("#sessionUser"),
+  logoutButton: document.querySelector("#logoutButton")
 };
 
 function loadState() {
@@ -165,6 +183,23 @@ function loadState() {
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function loadSession() {
+  try {
+    return JSON.parse(sessionStorage.getItem(SESSION_KEY));
+  } catch {
+    return null;
+  }
+}
+
+function saveSession(nextSession) {
+  session = nextSession;
+  if (nextSession) {
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(nextSession));
+  } else {
+    sessionStorage.removeItem(SESSION_KEY);
+  }
 }
 
 function selectedTicket() {
@@ -229,6 +264,8 @@ function canEditLog() {
 }
 
 function render() {
+  renderAuthGate();
+  if (!session) return;
   const ticket = selectedTicket();
   renderNavigation();
   renderRoles();
@@ -243,6 +280,14 @@ function render() {
   renderParts(ticket);
   renderAccountRequests();
   renderAdmin(ticket);
+}
+
+function renderAuthGate() {
+  els.authScreen.classList.toggle("is-hidden", Boolean(session));
+  els.portalApp.classList.toggle("is-hidden", !session);
+  if (!session) return;
+  state.role = session.role;
+  els.sessionUser.textContent = `${session.email} - ${session.role}`;
 }
 
 function renderNavigation() {
@@ -477,6 +522,26 @@ function accountRequestCard(request, includeActions) {
   `;
 }
 
+function createAccountRequest({ company, name, email, phone = "", reference, accessType = "Customer", notes }) {
+  const nextId = `AR-${String(1001 + (state.accountRequests || []).length).padStart(4, "0")}`;
+  const request = {
+    id: nextId,
+    company,
+    name,
+    email,
+    phone,
+    reference,
+    accessType,
+    notes,
+    status: "Pending",
+    submittedAt: todayIso()
+  };
+  state.accountRequests = [...(state.accountRequests || []), request];
+  selectedTicket().audit.push({ date: todayIso(), text: `Account request submitted: ${request.id}.` });
+  saveState();
+  return request;
+}
+
 function activateSection(sectionName) {
   els.navItems.forEach((button) => {
     button.classList.toggle("active", button.dataset.target === sectionName);
@@ -530,9 +595,46 @@ function parseCsv(text) {
 els.roles.forEach((button) => {
   button.addEventListener("click", () => {
     state.role = button.dataset.role;
+    if (session) saveSession({ ...session, role: state.role });
     saveState();
     render();
   });
+});
+
+els.loginForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const email = els.loginEmail.value.trim().toLowerCase();
+  const password = els.loginPassword.value.trim();
+  if (!email || !password) {
+    els.loginError.textContent = "Email and password are required.";
+    return;
+  }
+  saveSession({ email, role: els.loginRole.value });
+  state.role = els.loginRole.value;
+  els.loginError.textContent = "";
+  els.loginPassword.value = "";
+  saveState();
+  render();
+});
+
+els.logoutButton.addEventListener("click", () => {
+  saveSession(null);
+  activateSection("overview");
+  render();
+});
+
+els.publicAccountRequestForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const request = createAccountRequest({
+    company: els.publicRequestCompany.value.trim(),
+    name: els.publicRequestName.value.trim(),
+    email: els.publicRequestEmail.value.trim(),
+    reference: els.publicRequestReference.value.trim(),
+    notes: els.publicRequestNotes.value.trim()
+  });
+  els.publicAccountRequestForm.reset();
+  els.publicRequestStatus.textContent = `Request ${request.id} submitted for review.`;
+  renderAuthGate();
 });
 
 els.navItems.forEach((button) => {
@@ -630,23 +732,16 @@ els.bomUpload.addEventListener("change", async () => {
 
 els.accountRequestForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  const nextId = `AR-${String(1001 + (state.accountRequests || []).length).padStart(4, "0")}`;
-  const request = {
-    id: nextId,
+  createAccountRequest({
     company: els.requestCompany.value.trim(),
     name: els.requestName.value.trim(),
     email: els.requestEmail.value.trim(),
     phone: els.requestPhone.value.trim(),
     reference: els.requestReference.value.trim(),
     accessType: els.requestAccessType.value,
-    notes: els.requestNotes.value.trim(),
-    status: "Pending",
-    submittedAt: todayIso()
-  };
-  state.accountRequests = [...(state.accountRequests || []), request];
-  selectedTicket().audit.push({ date: todayIso(), text: `Account request submitted: ${request.id}.` });
+    notes: els.requestNotes.value.trim()
+  });
   els.accountRequestForm.reset();
-  saveState();
   render();
 });
 

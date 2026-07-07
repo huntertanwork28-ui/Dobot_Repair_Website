@@ -97,6 +97,83 @@ textarea {
   resize: vertical;
 }
 
+.is-hidden {
+  display: none !important;
+}
+
+.auth-screen {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(320px, 0.88fr) minmax(420px, 1fr);
+  background: var(--page);
+}
+
+.auth-brand-panel {
+  display: grid;
+  align-content: center;
+  gap: 0.8rem;
+  min-height: 100vh;
+  padding: clamp(2rem, 5vw, 4.5rem);
+  background: var(--nav);
+  color: #fff;
+}
+
+.auth-brand-panel .eyebrow {
+  color: #9cc4f7;
+}
+
+.auth-brand-panel h1 {
+  margin: 0;
+  font-size: clamp(2.2rem, 5vw, 4.2rem);
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.auth-brand-panel p:last-child {
+  max-width: 520px;
+  margin: 0;
+  color: #cbd5e1;
+  font-size: 1rem;
+}
+
+.brand-mark.large {
+  width: 58px;
+  height: 58px;
+  font-size: 1.4rem;
+}
+
+.auth-card-stack {
+  display: grid;
+  align-content: center;
+  gap: 1rem;
+  padding: clamp(1rem, 4vw, 3rem);
+}
+
+.auth-card {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 1.2rem;
+}
+
+.auth-card h2,
+.auth-card h3 {
+  margin: 0.2rem 0 1rem;
+}
+
+.secondary-card {
+  background: #f8fafc;
+}
+
+.form-error {
+  min-height: 1.2rem;
+  margin: 0;
+  color: var(--red);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
 .app-shell {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
@@ -189,7 +266,7 @@ textarea {
   top: 0;
   z-index: 8;
   display: grid;
-  grid-template-columns: minmax(360px, 1fr) auto;
+  grid-template-columns: minmax(320px, 1fr) auto auto;
   gap: 1rem;
   align-items: end;
   padding: 1rem clamp(1rem, 2.6vw, 2rem);
@@ -236,6 +313,22 @@ textarea {
 .role.active {
   background: var(--blue);
   color: #fff;
+}
+
+.session-actions {
+  display: grid;
+  gap: 0.4rem;
+  justify-items: end;
+}
+
+.session-user {
+  max-width: 240px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .content {
@@ -692,6 +785,19 @@ textarea {
 }
 
 @media (max-width: 900px) {
+  .auth-screen {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-brand-panel {
+    min-height: auto;
+    padding: 1.2rem;
+  }
+
+  .auth-brand-panel h1 {
+    font-size: 2rem;
+  }
+
   .app-shell {
     grid-template-columns: 1fr;
   }
@@ -731,6 +837,14 @@ textarea {
   .topbar {
     grid-template-columns: 1fr;
     position: static;
+  }
+
+  .session-actions {
+    justify-items: stretch;
+  }
+
+  .session-user {
+    max-width: 100%;
   }
 }
 
