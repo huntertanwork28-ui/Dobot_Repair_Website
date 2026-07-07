@@ -8,16 +8,22 @@
   </head>
   <body>
     <section id="authScreen" class="auth-screen">
-      <div class="auth-brand-panel">
-        <div class="brand-mark large">D</div>
-        <p class="eyebrow">Dobot Service</p>
-        <h1>Repair Portal</h1>
-        <p>Secure access for repair tracking, warranty validation, logistics updates, parts review, and service communication.</p>
-      </div>
+      <article class="auth-card">
+        <div class="auth-heading">
+          <div class="brand-mark large">D</div>
+          <p class="eyebrow">Dobot Service</p>
+          <h1>Repair Portal</h1>
+          <p>Sign in to track repair cases, warranty status, logistics, SLA, and service communication.</p>
+        </div>
 
-      <div class="auth-card-stack">
-        <article class="auth-card">
-          <p class="eyebrow">Authorized users</p>
+        <div class="auth-mode-tabs" aria-label="Account actions">
+          <button class="auth-mode active" data-auth-mode="signin" type="button">Sign in</button>
+          <button class="auth-mode" data-auth-mode="register" type="button">Create Account</button>
+          <button class="auth-mode" data-auth-mode="verify" type="button">Verify Email</button>
+          <button class="auth-mode" data-auth-mode="forgot" type="button">Forgot Password</button>
+        </div>
+
+        <section class="auth-panel active" data-auth-panel="signin">
           <h2>Sign in</h2>
           <form id="loginForm" class="stacked-form">
             <label>
@@ -31,15 +37,10 @@
             <button type="submit">Sign in to portal</button>
             <p id="loginError" class="form-error" aria-live="polite"></p>
           </form>
-        </article>
+        </section>
 
-        <article class="auth-card secondary-card">
-          <div class="panel-title">
-            <div>
-              <p class="eyebrow">Need access?</p>
-              <h3>Register Account</h3>
-            </div>
-          </div>
+        <section class="auth-panel" data-auth-panel="register">
+          <h2>Create Account</h2>
           <form id="registrationForm" class="stacked-form">
             <label>
               Company name
@@ -65,11 +66,14 @@
               Notes
               <textarea id="registerNotes" rows="3" placeholder="Tell us which repair case or machine this account should access"></textarea>
             </label>
-            <button type="submit" class="secondary">Create account</button>
+            <button type="submit">Create account</button>
             <p id="registrationStatus" class="empty-note"></p>
           </form>
+        </section>
 
-          <form id="verificationForm" class="stacked-form verification-form">
+        <section class="auth-panel" data-auth-panel="verify">
+          <h2>Verify Email</h2>
+          <form id="verificationForm" class="stacked-form">
             <label>
               Email
               <input id="verifyEmail" type="email" placeholder="name@company.com" required />
@@ -78,11 +82,40 @@
               Verification code
               <input id="verifyCode" type="text" placeholder="6-digit code" required />
             </label>
-            <button type="submit" class="secondary">Verify email</button>
+            <button type="submit">Verify email</button>
             <p id="verificationStatus" class="empty-note"></p>
           </form>
-        </article>
-      </div>
+        </section>
+
+        <section class="auth-panel" data-auth-panel="forgot">
+          <h2>Forgot Password</h2>
+          <form id="forgotPasswordForm" class="stacked-form">
+            <label>
+              Work email
+              <input id="forgotEmail" type="email" placeholder="name@company.com" required />
+            </label>
+            <button type="submit" class="secondary">Send reset code</button>
+            <p id="forgotPasswordStatus" class="empty-note"></p>
+          </form>
+
+          <form id="resetPasswordForm" class="stacked-form reset-form">
+            <label>
+              Email
+              <input id="resetEmail" type="email" placeholder="name@company.com" required />
+            </label>
+            <label>
+              Reset code
+              <input id="resetCode" type="text" placeholder="6-digit code" required />
+            </label>
+            <label>
+              New password
+              <input id="resetPassword" type="password" placeholder="Create new password" required />
+            </label>
+            <button type="submit">Reset password</button>
+            <p id="resetPasswordStatus" class="empty-note"></p>
+          </form>
+        </section>
+      </article>
     </section>
 
     <div id="portalApp" class="app-shell is-hidden">

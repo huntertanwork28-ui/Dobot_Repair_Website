@@ -1,4 +1,4 @@
-const STORAGE_KEY = "repair-tracking-portal-state-v8";
+const STORAGE_KEY = "repair-tracking-portal-state-v10";
 const SESSION_KEY = "repair-tracking-portal-session-v1";
 
 const seedState = {
@@ -133,6 +133,8 @@ const els = {
   loginEmail: document.querySelector("#loginEmail"),
   loginPassword: document.querySelector("#loginPassword"),
   loginError: document.querySelector("#loginError"),
+  authModes: document.querySelectorAll(".auth-mode"),
+  authPanels: document.querySelectorAll(".auth-panel"),
   registrationForm: document.querySelector("#registrationForm"),
   registerCompany: document.querySelector("#registerCompany"),
   registerName: document.querySelector("#registerName"),
@@ -145,6 +147,14 @@ const els = {
   verifyEmail: document.querySelector("#verifyEmail"),
   verifyCode: document.querySelector("#verifyCode"),
   verificationStatus: document.querySelector("#verificationStatus"),
+  forgotPasswordForm: document.querySelector("#forgotPasswordForm"),
+  forgotEmail: document.querySelector("#forgotEmail"),
+  forgotPasswordStatus: document.querySelector("#forgotPasswordStatus"),
+  resetPasswordForm: document.querySelector("#resetPasswordForm"),
+  resetEmail: document.querySelector("#resetEmail"),
+  resetCode: document.querySelector("#resetCode"),
+  resetPassword: document.querySelector("#resetPassword"),
+  resetPasswordStatus: document.querySelector("#resetPasswordStatus"),
   navItems: document.querySelectorAll(".nav-item"),
   sections: document.querySelectorAll(".section-page"),
   lookupInput: document.querySelector("#lookupInput"),
@@ -620,6 +630,24 @@ function registerUser({ company, name, email, password, reference, notes }) {
   return { request, verificationCode };
 }
 
+function activateAuthMode(mode) {
+  els.authModes.forEach((button) => {
+    button.classList.toggle("active", button.dataset.authMode === mode);
+  });
+  els.authPanels.forEach((panel) => {
+    panel.classList.toggle("active", panel.dataset.authPanel === mode);
+  });
+}
+
+function createPasswordReset(email) {
+  const user = findUser(email);
+  if (!user) return { error: "No account found for this email." };
+  if (!user.verified) return { error: "Please verify this email before resetting the password." };
+  user.passwordResetCode = createVerificationCode();
+  saveState();
+  return { resetCode: user.passwordResetCode };
+}
+
 function activateSection(sectionName) {
   els.navItems.forEach((button) => {
     button.classList.toggle("active", button.dataset.target === sectionName);
@@ -670,6 +698,12 @@ function parseCsv(text) {
     .map((line) => line.split(",").map((cell) => cell.trim()));
 }
 
+els.authModes.forEach((button) => {
+  button.addEventListener("click", () => {
+    activateAuthMode(button.dataset.authMode);
+  });
+});
+
 els.loginForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const email = els.loginEmail.value.trim().toLowerCase();
@@ -718,6 +752,7 @@ els.registrationForm.addEventListener("submit", (event) => {
   els.verifyEmail.value = els.registerEmail.value.trim().toLowerCase();
   els.registrationForm.reset();
   els.registrationStatus.textContent = `Request ${result.request.id} submitted. Verification code: ${result.verificationCode}`;
+  activateAuthMode("verify");
   renderAuthGate();
 });
 
@@ -744,6 +779,43 @@ els.verificationForm.addEventListener("submit", (event) => {
   saveState();
   els.verificationForm.reset();
   els.verificationStatus.textContent = "Email verified. You can now sign in.";
+  els.loginEmail.value = email;
+  activateAuthMode("signin");
+});
+
+els.forgotPasswordForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const email = els.forgotEmail.value.trim().toLowerCase();
+  const result = createPasswordReset(email);
+  if (result.error) {
+    els.forgotPasswordStatus.textContent = result.error;
+    return;
+  }
+  els.resetEmail.value = email;
+  els.forgotPasswordStatus.textContent = `Password reset code: ${result.resetCode}`;
+});
+
+els.resetPasswordForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const email = els.resetEmail.value.trim().toLowerCase();
+  const user = findUser(email);
+  if (!user) {
+    els.resetPasswordStatus.textContent = "No account found for this email.";
+    return;
+  }
+  if (user.passwordResetCode !== els.resetCode.value.trim()) {
+    els.resetPasswordStatus.textContent = "Reset code does not match.";
+    return;
+  }
+  user.password = els.resetPassword.value.trim();
+  delete user.passwordResetCode;
+  selectedTicket().audit.push({ date: todayIso(), text: `Password reset completed for ${email}.` });
+  saveState();
+  els.resetPasswordForm.reset();
+  els.forgotPasswordForm.reset();
+  els.loginEmail.value = email;
+  els.resetPasswordStatus.textContent = "Password updated. You can now sign in.";
+  activateAuthMode("signin");
 });
 
 els.navItems.forEach((button) => {
